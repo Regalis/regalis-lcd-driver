@@ -22,6 +22,7 @@
 #include <util/atomic.h>
 
 #include "regalis_lcd.h"
+#include "regalis_lcd_config.h"
 
 #define STR(X) #X
 #define GET_DDR(X, Y) DDR ## X
@@ -67,34 +68,66 @@
 	#error invalid value for REGALIS_LCD_LINES (type 1 or 2)
 #endif
 
-#if REGALIS_LCD_FONT == "5x8"
+#if REGALIS_LCD_FONT == 0
 	#define RL_FONT 0x0
-#elif REGALIS_LCD_FONT == "5x11"
+#elif REGALIS_LCD_FONT == 1
 	#define RL_FONT 0x4
 #else
 	#error invalid value for REGALIS_LCD_FONT (select "5x8" or "5x11")
 #endif
 
-/* INSTRUCTIONS */
+#if REGALIS_LCD_CURSOR == 1
+	#define RL_CURSOR RL_CURSOR_ON
+#elif REGALIS_LCD_CURSOR == 0
+	#define RL_CURSOR RL_CURSOR_OFF
+#else
+	#error invalid value for REGALIS_LCD_CURSOR (select 0 or 1)
+#endif
 
-#define RL_CLEAR_DISPLAY 0x01
-#define RL_RETURN_HOME 0x02
+#if REGALIS_LCD_CURSOR_BLINK == 1
+	#define RL_CURSOR_BLINK RL_CURSOR_BLINK_ON
+#elif REGALIS_LCD_CURSOR == 0
+	#define RL_CURSOR_BLINK RL_CURSOR_BLINK_OFF
+#else
+	#error invalid value for REGALIS_LCD_CURSOR_BLINK (select 0 or 1)
+#endif
 
+#if REGALIS_LCD_DDRAM_BH == 1
+	#define RL_DDRAM_BH RL_INCREMENT
+#elif REGALIS_LCD_DDRAM_BH == 0
+	#define RL_DDRAM_BH RL_DECREMENT
+#else
+	#error invalid value for REGALIS_LCD_DDRAM_BH (select 0 or 1)
+#endif
+
+#if REGALIS_LCD_SHIFT == 1
+	#define RL_SHIFT RL_SHIFT_ON
+#elif REGALIS_LCD_SHIFT == 0
+	#define RL_SHIFT RL_SHIFT_OFF
+#else
+	#error invalid value for REGALIS_LCD_SHIFT (select 0 or 1)
+#endif
+
+/* Protected instructions */
 #define RL_FUNCTION_SET(LINES, FONT) 0x20 | LINES | FONT
-
 
 static inline void regalis_lcd_enable();
 void regalis_lcd_exec(uint8_t command);
 
 
-void regalis_lcd_init(uint8_t x) {
+void regalis_lcd_init() {
 	_delay_ms(40); // wait for power stabilisation
-	regalis_lcd_exec(RL_FUNCTION(RL_LINES, RL_FONT) >> 4); // set 4-bit interface mode
+	regalis_lcd_exec(RL_FUNCTION_SET(RL_LINES, RL_FONT) >> 4); // set 4-bit interface mode
 	_delay_ms(4);
 	// now exec instructions in 4-bit mode
-	regalis_lcd_instruction(RL_FUNCTION(RL_LINES, RL_FONT));
+	regalis_lcd_instruction(RL_FUNCTION_SET(RL_LINES, RL_FONT));
 	_delay_us(45);
-	regalis_lcd_instruction(
+	regalis_lcd_instruction(RL_DISPLAY_ON_OFF(RL_DISPLAY_ON, RL_CURSOR, RL_CURSOR_BLINK));
+	_delay_us(45);
+	regalis_lcd_instruction(RL_CLEAR_DISPLAY);
+	_delay_ms(2);
+	regalis_lcd_instruction(RL_ENTRY_MODE_SET(RL_DDRAM_BH, RL_SHIFT));
+	_delay_us(100);
 }
 
 /** Execute low-level command
@@ -115,19 +148,19 @@ void regalis_lcd_exec(uint8_t command) {
 	RL_RS_PORT |= ((command & _BV(5)) >> (5 - RL_RS_PIN));
 	RL_RW_PORT &= ~(_BV(RL_RW_PIN));
 	RL_RW_PORT |= ((command & _BV(4)) >> (4 - RL_RW_PIN));
-	RL_D7_PORT &= ~(BV(RL_D7_PORT));
+	RL_D7_PORT &= ~(_BV(RL_D7_PORT));
 	RL_D7_PORT |= ((command & _BV(3)) >> (3 - RL_D7_PIN));
-	RL_D6_PORT &= ~(BV(RL_D6_PORT));
+	RL_D6_PORT &= ~(_BV(RL_D6_PORT));
 	RL_D6_PORT |= ((command & _BV(2)) >> (2 - RL_D6_PIN));
-	RL_D5_PORT &= ~(BV(RL_D6_PORT));
+	RL_D5_PORT &= ~(_BV(RL_D6_PORT));
 	RL_D5_PORT |= ((command & _BV(1)) >> (1 - RL_D5_PIN));
-	RL_D4_PORT &= ~(BV(RL_D4_PORT));
+	RL_D4_PORT &= ~(_BV(RL_D4_PORT));
 	RL_D4_PORT |= ((command & _BV(0)) >> (0 - RL_D4_PIN));
 
 	regalis_lcd_enable();
 }
 
-static inline void regalis_lcd_instruction(uint8_t instruction) {
+inline void regalis_lcd_instruction(uint8_t instruction) {
 	regalis_lcd_exec(0x0 | (instruction >> 4));
 	_delay_us(100);
 	regalis_lcd_exec(0x0 | (instruction & 0x0F));

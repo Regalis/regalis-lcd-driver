@@ -21,11 +21,25 @@
 #define __REGALIS_LCD_
 #include <inttypes.h>
 
-void regalis_lcd_init(uint8_t mode);
-void regalis_lcd_clear();
-void regalis_lcd_puts(char* character);
-void regalis_lcd_print(char *line);
-void regalis_lcd_println(char *line);
+/* INSTRUCTIONS (can be executed manually with regalis_lcd_instruction()) */
+#define RL_CLEAR_DISPLAY 0x01
+#define RL_RETURN_HOME 0x02
+#define RL_DISPLAY_ON_OFF(ON_OFF, CURSOR, BLINK) 0x08 | ON_OFF | CURSOR | BLINK
+	#define RL_DISPLAY_ON 0x03
+	#define RL_DISPLAY_OFF 0x00
+	#define RL_CURSOR_ON 0x02
+	#define RL_CURSOR_OFF 0x00
+	#define RL_CURSOR_BLINK_ON 0x01
+	#define RL_CURSOR_BLINK_OFF 0x00
+#define RL_ENTRY_MODE_SET(INC, SHIFT) 0x03 | INC | SHIFT
+	#define RL_INCREMENT 0x02
+	#define RL_DECREMENT 0x00
+	#define RL_SHIFT_ON 0x01
+	#define RL_SHIFT_OFF 0x00
 
+
+void regalis_lcd_init();
+void regalis_lcd_clear();
+void regalis_lcd_instruction(uint8_t rl_instruction);
 
 #endif

@@ -28,7 +28,7 @@
 #define REGALIS_LCD_D4  B, 0
 #define REGALIS_LCD_D5  B, 1
 #define REGALIS_LCD_D6  B, 2
-#define REGALIS_LCD_D4  B, 3
+#define REGALIS_LCD_D7  B, 3
 
 /**********************************************
  *       Basic LCD configuration block        *
@@ -43,12 +43,25 @@
 
 /** LCD font size
  * Valid values:
- * \a "5x8"
- * \a "5x11"
+ * \a 0 for "5x8" font
+ * \a 1 for "5x11" font
 */
-#define REGALIS_LCD_FONT "5x8"
+#define REGALIS_LCD_FONT 0
 
+/** LCD cursor
+ * Valid values:
+ * \a 1 - cursor is on
+ * \a 0 - cursor is off
+*/
+#define REGALIS_LCD_CURSOR 0
 
+/** LCD cursor blink
+ * Valid values:
+ * \a 1 - cursor blink is on, that performs alternate between
+ * all the high data and display character at the cursor position
+ * \a 0 - blink is off
+*/
+#define REGALIS_LCD_CURSOR_BLINK 0
 
 
 /**********************************************
@@ -62,12 +75,12 @@
  * \a 0 - auto decrement mode
  * \a 1 - auto increment mode
  */
-#define REGALIS_LCD_DDRAM_BH 1 //!< 1 for auto increment, 0 for auto decrement
+#define REGALIS_LCD_DDRAM_BH 1
 
 /** Shift of entire display
  * Valid values:
  * \a 0 - disable auto shift
  * \a 1 - enable auto shift
  */
-#define REGALIS_LCD_SHIFT
+#define REGALIS_LCD_SHIFT 1
 
