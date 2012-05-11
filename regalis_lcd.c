@@ -40,9 +40,9 @@
 #define RL_RW_PORT PORT(REGALIS_LCD_RW)
 #define RL_RW_PIN PIN(REGALIS_LCD_RW)
 
-#define RL_E_DDR DDR(REGALIS_LCD_RW)
-#define RL_E_PORT PORT(REGALIS_LCD_RW)
-#define RL_E_PIN PIN(REGALIS_LCD_RW)
+#define RL_E_DDR DDR(REGALIS_LCD_E)
+#define RL_E_PORT PORT(REGALIS_LCD_E)
+#define RL_E_PIN PIN(REGALIS_LCD_E)
 
 #define RL_D4_DDR DDR(REGALIS_LCD_D4)
 #define RL_D4_PORT PORT(REGALIS_LCD_D4)
@@ -109,32 +109,32 @@
 #endif
 
 /* Protected instructions */
-#define RL_FUNCTION_SET(LINES, FONT) 0x20 | LINES | FONT
+#define RL_FUNCTION_SET(LINES, FONT) (0x20 | LINES | FONT)
 
 static inline void regalis_lcd_enable();
 void regalis_lcd_exec(uint8_t command);
 
 
 void regalis_lcd_init() {
-	_delay_ms(40); // wait for power stabilisation
+	_delay_ms(100); // wait for power stabilisation
 	regalis_lcd_exec(RL_FUNCTION_SET(RL_LINES, RL_FONT) >> 4); // set 4-bit interface mode
-	_delay_ms(4);
+	_delay_ms(100);
 	// now exec instructions in 4-bit mode
 	regalis_lcd_instruction(RL_FUNCTION_SET(RL_LINES, RL_FONT));
-	_delay_us(45);
+	_delay_ms(100);
 	regalis_lcd_instruction(RL_DISPLAY_ON_OFF(RL_DISPLAY_ON, RL_CURSOR, RL_CURSOR_BLINK));
-	_delay_us(45);
+	_delay_ms(100);
 	regalis_lcd_instruction(RL_CLEAR_DISPLAY);
-	_delay_ms(2);
+	_delay_ms(100);
 	regalis_lcd_instruction(RL_ENTRY_MODE_SET(RL_DDRAM_BH, RL_SHIFT));
-	_delay_us(100);
+	_delay_ms(100);
 }
 
 /** Execute low-level command
  * @param command is 8-bit value \
  *
  * | X | X | RS | RW | D7 | D6 | D5 | D4 |
- *   7   6   5    4    4    2    1    0
+ *   7   6   5    4    3    2    1    0
  */
 void regalis_lcd_exec(uint8_t command) {
 	RL_RS_DDR |= _BV(RL_RS_PIN);
@@ -160,6 +160,12 @@ void regalis_lcd_exec(uint8_t command) {
 	regalis_lcd_enable();
 }
 
+void regalis_lcd_put(char c) {
+	regalis_lcd_exec(0x20 | (c >> 4));
+	_delay_us(100);
+	regalis_lcd_exec(0x20 | (c & 0x0F));
+}
+
 inline void regalis_lcd_instruction(uint8_t instruction) {
 	regalis_lcd_exec(0x0 | (instruction >> 4));
 	_delay_us(100);
@@ -170,7 +176,7 @@ static inline void regalis_lcd_enable() {
 	RL_E_DDR |= _BV(RL_E_PIN);
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 		RL_E_PORT |= _BV(RL_E_PIN);
-		_delay_us(1);
+		_delay_us(10);
 		RL_E_PORT &= ~(_BV(RL_E_PIN));
 	}
 }

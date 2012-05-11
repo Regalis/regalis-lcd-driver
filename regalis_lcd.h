@@ -31,7 +31,7 @@
 	#define RL_CURSOR_OFF 0x00
 	#define RL_CURSOR_BLINK_ON 0x01
 	#define RL_CURSOR_BLINK_OFF 0x00
-#define RL_ENTRY_MODE_SET(INC, SHIFT) 0x03 | INC | SHIFT
+#define RL_ENTRY_MODE_SET(INC, SHIFT) 0x04 | INC | SHIFT
 	#define RL_INCREMENT 0x02
 	#define RL_DECREMENT 0x00
 	#define RL_SHIFT_ON 0x01
@@ -41,5 +41,6 @@
 void regalis_lcd_init();
 void regalis_lcd_clear();
 void regalis_lcd_instruction(uint8_t rl_instruction);
+void regalis_lcd_put(char c);
 
 #endif

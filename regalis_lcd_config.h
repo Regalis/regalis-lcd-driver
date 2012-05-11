@@ -83,4 +83,3 @@
  * \a 1 - enable auto shift
  */
 #define REGALIS_LCD_SHIFT 1
-
