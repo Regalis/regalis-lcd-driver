@@ -25,7 +25,7 @@
 #define RL_CLEAR_DISPLAY 0x01
 #define RL_RETURN_HOME 0x02
 #define RL_DISPLAY_ON_OFF(ON_OFF, CURSOR, BLINK) 0x08 | ON_OFF | CURSOR | BLINK
-	#define RL_DISPLAY_ON 0x03
+	#define RL_DISPLAY_ON 0x04
 	#define RL_DISPLAY_OFF 0x00
 	#define RL_CURSOR_ON 0x02
 	#define RL_CURSOR_OFF 0x00
@@ -36,11 +36,56 @@
 	#define RL_DECREMENT 0x00
 	#define RL_SHIFT_ON 0x01
 	#define RL_SHIFT_OFF 0x00
+#define RL_FUNCTION_SET(MODE, LINES, FONT) 0x20 | MODE | LINES | FONT
+	#define RL_MODE_4BIT 0x00
+	#define RL_MODE_8BIT 0x10
+	#define RL_LINES_1 0x00
+	#define RL_LINES_2 0x08
+	#define RL_FONT_5x8 0x00
+	#define RL_FONT_5x11 0x04
+
+/* Defines - function arguments */
+#define RL_READ_BUSY 0xFF
+#define RL_READ_DATA 0x00
 
 
+/** Initialize LCD */
 void regalis_lcd_init();
+
+/** Clear display */
 void regalis_lcd_clear();
+
+/** Return to home (first line, first character) */
+void regalis_lcd_home();
+
+/** Read data from LCD
+ * @param register_select read busy flag (bit 7) and address counter (bits 0-6) \
+ * or DDRAM address. Possible values: \
+ * 	\b RL_READ_BUSY \
+ * 	\b RL_READ_DATA \
+ * 	@return unsigned 8-bits value
+ */
+uint8_t regalis_lcd_read(uint8_t register_select);
+
+/** Execute instruction
+ * @param rl_instruction instruction to execute, should be one of:
+ *  \b RL_CLEAR_DISPLAY \
+ *  \b RL_RETURN_HOME \
+ *  \b RL_DISPLAY_ON_OFF(ON_OFF, CURSOR, BLINK) \
+ *  \b RL_ENTRY_MODE_SET(INC, SHIFT) \
+ *  \b RL_FUNCTION_SET(MODE, LINES, FONT) 
+ */
 void regalis_lcd_instruction(uint8_t rl_instruction);
-void regalis_lcd_put(char c);
+
+/** Send single character to LCD
+ * @param character ASCII character
+ */
+void regalis_lcd_putc(char character);
+
+/** Send string to LCD
+ * @param string C string terminated with '\0'
+ */
+void regalis_lcd_puts(const char* string);
 
 #endif
+
