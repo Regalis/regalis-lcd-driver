@@ -30,9 +30,7 @@
 #include "regalis_lcd_config.h"
 
 #ifdef PC_DEBUG
-
 	#define _BV(X) (1 << (X))
-
 	uint8_t DDRA, DDRB, DDRC, DDRD;
 	uint8_t PORTA, PORTB, PORTC, PORTD;
 	inline void _delay_ms(uint32_t x) {
@@ -152,7 +150,7 @@ static void regalis_lcd_exec(uint8_t command);
 static void regalis_lcd_enable();
 static void regalis_lcd_wait_busy();
 
-inline void regalis_lcd_instruction(uint8_t instruction) {
+inline void _regalis_lcd_instruction(uint8_t instruction) {
 	#ifdef PC_DEBUG
 		static int i_no;
 		fprintf(stderr, "=> [lcd_instruction][%d] Executiong instruction: 0x%X\n", i_no++, instruction);
@@ -160,6 +158,11 @@ inline void regalis_lcd_instruction(uint8_t instruction) {
 	regalis_lcd_exec(instruction >> 4);
 	_delay_ms(1);
 	regalis_lcd_exec(instruction & 0x0F); 
+}
+
+inline void regalis_lcd_instruction(uint8_t instruction) {
+	regalis_lcd_wait_busy();
+	_regalis_lcd_instruction(instruction);
 }
 
 
@@ -185,16 +188,16 @@ void regalis_lcd_init() {
 	regalis_lcd_exec(0x02); // set 4 bits interface
 	_delay_us(64); // after this delay we can use internal regalis_lcd_instruction(X)
 
-	regalis_lcd_instruction(RL_FUNCTION_SET(RL_MODE_4BIT, RL_LINES, RL_FONT));
+	_regalis_lcd_instruction(RL_FUNCTION_SET(RL_MODE_4BIT, RL_LINES, RL_FONT));
 	_delay_ms(45);
-	regalis_lcd_instruction(RL_DISPLAY_ON_OFF(0, 0, 0)); // display off
+	_regalis_lcd_instruction(RL_DISPLAY_ON_OFF(0, 0, 0)); // display off
 	_delay_ms(45);
-	regalis_lcd_instruction(RL_CLEAR_DISPLAY);
+	_regalis_lcd_instruction(RL_CLEAR_DISPLAY);
 	_delay_ms(45);
-	regalis_lcd_instruction(RL_ENTRY_MODE_SET(RL_DDRAM_BH, RL_SHIFT));
+	_regalis_lcd_instruction(RL_ENTRY_MODE_SET(RL_DDRAM_BH, RL_SHIFT));
 	_delay_ms(45);
 
-	regalis_lcd_instruction(RL_DISPLAY_ON_OFF(RL_DISPLAY_ON, RL_CURSOR, RL_CURSOR_BLINK));
+	_regalis_lcd_instruction(RL_DISPLAY_ON_OFF(RL_DISPLAY_ON, RL_CURSOR, RL_CURSOR_BLINK));
 	_delay_ms(45);
 
 	// ready :)
@@ -294,17 +297,17 @@ uint8_t regalis_lcd_read(uint8_t register_select) {
 	uint8_t data = 0x00;
 
 	bit_high(RL_E_PORT, RL_E_PIN);
-	_delay_us(5);
+	_delay_us(30);
 	set_bit(data, 7, get_bit(RL_D7_IN, RL_D7_PIN));
 	set_bit(data, 6, get_bit(RL_D6_IN, RL_D6_PIN));
 	set_bit(data, 5, get_bit(RL_D5_IN, RL_D5_PIN));
 	set_bit(data, 4, get_bit(RL_D4_IN, RL_D4_PIN));
 	bit_low(RL_E_PORT, RL_E_PIN);
 
-	_delay_us(5);
+	_delay_us(10);
 
 	bit_high(RL_E_PORT, RL_E_PIN);
-	_delay_us(5);
+	_delay_us(30);
 	set_bit(data, 3, get_bit(RL_D7_IN, RL_D7_PIN));
 	set_bit(data, 2, get_bit(RL_D6_IN, RL_D6_PIN));
 	set_bit(data, 1, get_bit(RL_D5_IN, RL_D5_PIN));
@@ -315,7 +318,22 @@ uint8_t regalis_lcd_read(uint8_t register_select) {
 
 }
 
-inline void regalis_lcd_wait_busy() {
+void regalis_lcd_goto(uint8_t x, uint8_t y) {
+	#if REGALIS_LCD_LINES == 1
+		regalis_lcd_instruction(RL_DDRAM_SET(RL_LINE_1 + x));
+	#else
+		if(y == 0)
+			regalis_lcd_instruction(RL_DDRAM_SET(RL_LINE_1 + x));
+		else
+			regalis_lcd_instruction(RL_DDRAM_SET(RL_LINE_2 + x));
+	#endif
+}
+
+inline void regalis_lcd_goto_addr(uint8_t addr) {
+	regalis_lcd_instruction(RL_DDRAM_SET(addr));
+}
+
+static void regalis_lcd_wait_busy() {
 	register uint8_t data;
 	while( (data = regalis_lcd_read(RL_READ_BUSY)) & _BV(7)) {}
 	_delay_us(5); // wait (address counter)

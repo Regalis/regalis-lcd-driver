@@ -41,6 +41,9 @@
 */
 #define REGALIS_LCD_LINES 2
 
+/** Number of character in single line */
+#define REGALIS_LCD_CHARS 16
+
 /** LCD font size
  * Valid values:
  * \a 0 for "5x8" font

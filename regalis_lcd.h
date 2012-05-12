@@ -43,6 +43,15 @@
 	#define RL_LINES_2 0x08
 	#define RL_FONT_5x8 0x00
 	#define RL_FONT_5x11 0x04
+#define RL_DDRAM_SET(ADDR) 0x80 | ((ADDR) & 0x7F)
+	#define RL_LINE_1 0x00
+	#define RL_LINE_2 0x40
+#define RL_SHIFT_CURSOR(DIRECTION) 0x10 | (DIRECTION)
+	#define RL_CURSOR_RIGHT 0x4
+	#define RL_CURSOR_LEFT 0x0
+#define RL_SHIFT_DISPLAY(DIRECTION) 0x10 | (DIRECTION)
+	#define RL_DISPLAY_RIGHT 0xC
+	#define RL_DISPLAY_LEFT 0x8
 
 /* Defines - function arguments */
 #define RL_READ_BUSY 0xFF
@@ -59,20 +68,20 @@ void regalis_lcd_clear();
 void regalis_lcd_home();
 
 /** Read data from LCD
- * @param register_select read busy flag (bit 7) and address counter (bits 0-6) \
- * or DDRAM address. Possible values: \
- * 	\b RL_READ_BUSY \
- * 	\b RL_READ_DATA \
+ * @param register_select read busy flag (bit 7) and address counter (bits 0-6)
+ * or DDRAM address. Possible values:
+ * 	\b RL_READ_BUSY
+ * 	\b RL_READ_DATA
  * 	@return unsigned 8-bits value
  */
 uint8_t regalis_lcd_read(uint8_t register_select);
 
 /** Execute instruction
  * @param rl_instruction instruction to execute, should be one of:
- *  \b RL_CLEAR_DISPLAY \
- *  \b RL_RETURN_HOME \
- *  \b RL_DISPLAY_ON_OFF(ON_OFF, CURSOR, BLINK) \
- *  \b RL_ENTRY_MODE_SET(INC, SHIFT) \
+ *  \b RL_CLEAR_DISPLAY
+ *  \b RL_RETURN_HOME
+ *  \b RL_DISPLAY_ON_OFF(ON_OFF, CURSOR, BLINK)
+ *  \b RL_ENTRY_MODE_SET(INC, SHIFT)
  *  \b RL_FUNCTION_SET(MODE, LINES, FONT) 
  */
 void regalis_lcd_instruction(uint8_t rl_instruction);
@@ -86,6 +95,17 @@ void regalis_lcd_putc(char character);
  * @param string C string terminated with '\0'
  */
 void regalis_lcd_puts(const char* string);
+
+/** Move cursor to (x, y) position
+ * @param x horizontal position
+ * @param y vertical position
+ */
+void regalis_lcd_goto(uint8_t x, uint8_t y);
+
+/** Move cursor to specified address
+ * @param addr 6 bits address
+ */
+void regalis_lcd_goto_addr(uint8_t addr);
 
 #endif
 
