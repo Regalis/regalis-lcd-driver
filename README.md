@@ -43,8 +43,8 @@ To display *"Hello world"* message, just type:
 
 There are two different functions for manipulating cursor position:
 
-	* `regalis_lcd_goto(X, Y);` (first character, first line means X = 0 and Y = 0)
-	* `regalis_lcd_goto_addr(DDRAM_ADDR);`
+* `regalis_lcd_goto(X, Y);` (first character, first line means X = 0 and Y = 0)
+* `regalis_lcd_goto_addr(DDRAM_ADDR);`
 
 If you want to display *"Hello world"* in first line and *"regalis\_lcd"* in
 second line, you should use this functions:
@@ -67,10 +67,10 @@ To clear whole display and set cursor position in (0, 0) use `regalis_lcd_clear(
 
 `regalis_lcd` library also provides some simple functions that can be used to animate text:
 
-	* `regalis_soft_puts(const char *)` - print text with nice-looking smooth transition (from left to right)
-	* `regalis_soft_clear(uint8_t length)` - print text with nice-looking smooth transition (from left to right)
-	* `regalis_soft_move(uint8_t scr_addr, uint8_t dst_addr, uint8_t length)` - move *length* characters from *scr_addr* to *dst_addr* with smooth transition
-	* `regalis_shift_r(uint8_t amount)` - shift (left) display, wait and return to previous position
+* `regalis_soft_puts(const char *)` - print text with nice-looking smooth transition (from left to right)
+* `regalis_soft_clear(uint8_t length)` - print text with nice-looking smooth transition (from left to right)
+* `regalis_soft_move(uint8_t scr_addr, uint8_t dst_addr, uint8_t length)` - move *length* characters from *scr_addr* to *dst_addr* with smooth transition
+* `regalis_shift_r(uint8_t amount)` - shift (left) display, wait and return to previous position
 
 See **extras/regalis_lcd_extras.h** for full list of **extras** functions with documentation.
 
