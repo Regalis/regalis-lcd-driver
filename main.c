@@ -29,7 +29,7 @@ int main() {
 	 */
 	regalis_lcd_init();
 
-	/* -> Check your configuration, run a simple regalis_lcd demo */
+	/* -> Check your configuration - run a simple regalis_lcd demo */
 	while(1) {
 		regalis_lcd_demo();	
 	}

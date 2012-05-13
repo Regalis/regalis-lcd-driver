@@ -16,28 +16,34 @@
 # 
 
 OBJS=$(patsubst %.c, %.o, $(wildcard *.c))
+EXTRAS_OBJS=$(patsubst %.c, %.o, $(wildcard extras/*.c))
 F_CPU?=4000000UL
 DEVICE?=atmega8
 PROGRAMMER?=usbasp
 
-all: main.hex
+all: main.hex extras
+
+extras: $(EXTRAS_OBJS)
 
 main.hex: main.elf
 	avr-objcopy -O ihex -R .eeprom $< $@
 
-main.elf: $(OBJS)
+main.elf: $(OBJS) $(EXTRAS_OBJS)
 	avr-gcc $^ -mmcu=$(DEVICE) -Os -Wall -o $@
 
+extras/%.o: extras/%.c
+	avr-gcc -c -mmcu=$(DEVICE) -Os -Wall $< -o $@ -I ./ -DF_CPU=$(F_CPU)
+
 %.o: %.c
-	avr-gcc -c -mmcu=$(DEVICE) -Os -Wall $< -o $@ -DF_CPU=$(F_CPU)
+	avr-gcc -c -mmcu=$(DEVICE) -Os -Wall $< -o $@ -I extras/ -DF_CPU=$(F_CPU)
 
 %.o: %.c %.h
-	avr-gcc -c -mmcu=$(DEVICE) -Os -Wall $< -o $@ -DF_CPU=$(F_CPU)
+	avr-gcc -c -mmcu=$(DEVICE) -Os -Wall $< -o $@ -I extras/ -DF_CPU=$(F_CPU)
 
 clean:
-	@rm -rvf *.o main.elf || /bin/true
+	@rm -rvf $(OBJS) $(EXTRAS_OBJS) main.elf || /bin/true
 
 write: main.hex
 	avrdude -p $(DEVICE) -c $(PROGRAMMER) -U flash:w:$<
 
-.PHONY: all clean write
+.PHONY: all clean write extras
