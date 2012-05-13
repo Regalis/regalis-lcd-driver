@@ -22,7 +22,6 @@
 #include <util/delay.h>
 
 #include "regalis_lcd.h"
-#include "regalis_lcd_demo.h"
 #include "regalis_lcd_config.h"
 #include "regalis_lcd_extras.h"
 

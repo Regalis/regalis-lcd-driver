@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-OBJS=$(patsubst %.c, %.o, $(wildcard *.c))
+OBJS=$(patsubst %.c, %.o, $(wildcard *.c lib/*.c))
 EXTRAS_OBJS=$(patsubst %.c, %.o, $(wildcard extras/*.c))
 F_CPU?=4000000UL
 DEVICE?=atmega8
@@ -31,11 +31,11 @@ main.hex: main.elf
 main.elf: $(OBJS) $(EXTRAS_OBJS)
 	avr-gcc $^ -mmcu=$(DEVICE) -Os -Wall -o $@
 
-extras/%.o: extras/%.c
-	avr-gcc -c -mmcu=$(DEVICE) -Os -Wall $< -o $@ -I ./ -DF_CPU=$(F_CPU)
+extras/%.o: extras/%.c extras/%.h
+	avr-gcc -c -mmcu=$(DEVICE) -Os -Wall $< -o $@ -I lib/ -I ./ -DF_CPU=$(F_CPU)
 
 %.o: %.c
-	avr-gcc -c -mmcu=$(DEVICE) -Os -Wall $< -o $@ -I extras/ -DF_CPU=$(F_CPU)
+	avr-gcc -c -mmcu=$(DEVICE) -Os -Wall $< -o $@ -I extras/ -I lib/ -I ./ -DF_CPU=$(F_CPU)
 
 %.o: %.c %.h
 	avr-gcc -c -mmcu=$(DEVICE) -Os -Wall $< -o $@ -I extras/ -DF_CPU=$(F_CPU)

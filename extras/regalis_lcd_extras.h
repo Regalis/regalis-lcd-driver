@@ -17,6 +17,9 @@
 * 
 */
 
+#ifndef __REGALIS_LCD_EXTRAS_
+#define __REGALIS_LCD_EXTRAS_
+
 /** Number of milliseconds used for soft transitions */
 #define SOFT_DELAY 80
 
@@ -57,3 +60,5 @@ void regalis_soft_move(uint8_t scr_addr, uint8_t dst_addr, uint8_t length);
  * @param amount number of shifts
  */
 void regalis_shift_r(uint8_t amount);
+
+#endif
