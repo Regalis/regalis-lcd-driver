@@ -16,13 +16,15 @@ module initialization by executing instructions (set interface
 mode to 4-bits, set cursor behaviour etc.). After this operations
 cursor will be placed in (0, 0) position - first character, first line.
 
-	(...)
-	#include "regalis_lcd.h"
-	
-	int main() {
-		regalis_lcd_init();
-		/** Now you can read/write data from/to LCD */
-	}
+```C
+(...)
+#include "regalis_lcd.h"
+
+int main() {
+	regalis_lcd_init();
+	/** Now you can read/write data from/to LCD */
+}
+```
 
 To display character on your LCD, just use `regalis_lcd_putc(char)`
 function. If you want to display C string (const char \*), use
@@ -31,13 +33,15 @@ new line characters (\n).
 
 To display *"Hello world"* message, just type:
 
-	(...)
-	#include "regalis_lcd.h"
+```C
+(...)
+#include "regalis_lcd.h"
 
-	int main() {
-		regalis_lcd_init();
-		regalis_lcd_puts("Hello world!");
-	}
+int main() {
+	regalis_lcd_init();
+	regalis_lcd_puts("Hello world!");
+}
+```
 
 ## II. Cursor positioning
 
@@ -49,15 +53,17 @@ There are two different functions for manipulating cursor position:
 If you want to display *"Hello world"* in first line and *"regalis\_lcd"* in
 second line, you should use this functions:
 
-	(...)
-	#include "regalis_lcd.h"
+```C
+(...)
+#include "regalis_lcd.h"
 
-	int main() {
-		regalis_lcd_init();
-		regalis_lcd_puts("Hello world");
-		regalis_lcd_goto(0, 1);
-		regalis_lcd_puts("regalis_lcd");
-	}
+int main() {
+	regalis_lcd_init();
+	regalis_lcd_puts("Hello world");
+	regalis_lcd_goto(0, 1);
+	regalis_lcd_puts("regalis_lcd");
+}
+```
 
 ## Clearing display
 
