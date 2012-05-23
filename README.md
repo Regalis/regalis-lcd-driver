@@ -76,7 +76,10 @@ See **extras/regalis_lcd_extras.h** for full list of **extras** functions with d
 
 # Credits
 
-Developed with **VIM** on **Arch GNU/Linux**, tested with **WC1602A0**.
+Developed with **VIM** on **Arch GNU/Linux**, tested with:
+
+* **WC1602A0** (16x2)
+* **TC1602A-19T(R)** (16x2)
 
 Feel free to report bugs and suggestions.
 

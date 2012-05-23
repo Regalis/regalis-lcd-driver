@@ -240,6 +240,15 @@ inline void regalis_lcd_clear() {
 	regalis_lcd_instruction(RL_CLEAR_DISPLAY);
 }
 
+void regalis_lcd_clear_line(uint8_t line_no) {
+	regalis_lcd_goto(0, line_no);
+	int8_t length = REGALIS_LCD_CHARS;
+	while(length-- > 0) {
+		regalis_lcd_putc(' ');
+	}
+	regalis_lcd_goto(0, line_no);
+}
+
 inline void regalis_lcd_home() {
 	regalis_lcd_instruction(RL_RETURN_HOME);
 }
@@ -292,6 +301,7 @@ uint8_t regalis_lcd_read(uint8_t register_select) {
 		bit_low(RL_RS_PORT, RL_RS_PIN);
 	else
 		bit_high(RL_RS_PORT, RL_RS_PIN);
+
 	bit_high(RL_RW_PORT, RL_RW_PIN);
 
 	uint8_t data = 0x00;

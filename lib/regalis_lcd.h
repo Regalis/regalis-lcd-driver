@@ -64,6 +64,13 @@ void regalis_lcd_init();
 /** Clear display */
 void regalis_lcd_clear();
 
+/** Clear line
+ * After this operation cursor will be placed at the beginning
+ * of specified line (line_no).
+ * @param line_no line number (first line = 0)
+ */
+void regalis_lcd_clear_line(uint8_t line_no);
+
 /** Return to home (first line, first character) */
 void regalis_lcd_home();
 
