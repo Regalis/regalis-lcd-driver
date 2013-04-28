@@ -88,6 +88,7 @@ Developed with **VIM** on **Arch GNU/Linux**, tested with:
 
 * **WC1602A0** (16x2)
 * **TC1602A-19T(R)** (16x2)
+* **YM2004A** (20x4)
 
 Feel free to report bugs and suggestions.
 
