@@ -20,6 +20,9 @@
 #ifndef __REGALIS_LCD_
 #define __REGALIS_LCD_
 #include <inttypes.h>
+#include "regalis_lcd_config.h"
+
+#define RL_LINE_ADDR(X) ((0x50 / REGALIS_LCD_LINES) * (X - 1))
 
 /* INSTRUCTIONS (can be executed manually with regalis_lcd_instruction()) */
 #define RL_CLEAR_DISPLAY 0x01
@@ -44,8 +47,10 @@
 	#define RL_FONT_5x8 0x00
 	#define RL_FONT_5x11 0x04
 #define RL_DDRAM_SET(ADDR) 0x80 | ((ADDR) & 0x7F)
-	#define RL_LINE_1 0x00
-	#define RL_LINE_2 0x40
+	#define RL_LINE_1 RL_LINE_ADDR(1)
+	#define RL_LINE_2 RL_LINE_ADDR(2)
+	#define RL_LINE_3 RL_LINE_ADDR(3)
+	#define RL_LINE_4 RL_LINE_ADDR(4)
 #define RL_SHIFT_CURSOR(DIRECTION) 0x10 | (DIRECTION)
 	#define RL_CURSOR_RIGHT 0x4
 	#define RL_CURSOR_LEFT 0x0
@@ -58,7 +63,10 @@
 #define RL_READ_DATA 0x00
 
 
-/** Initialize LCD */
+/** Initialize LCD
+ * After this operation cursor will be placed
+ * at (0, 0) position - first character, first line.
+ **/
 void regalis_lcd_init();
 
 /** Clear display */
@@ -77,19 +85,19 @@ void regalis_lcd_home();
 /** Read data from LCD
  * @param register_select read busy flag (bit 7) and address counter (bits 0-6)
  * or DDRAM address. Possible values:
- * 	\b RL_READ_BUSY
- * 	\b RL_READ_DATA
+ * 	 RL_READ_BUSY
+ * 	 RL_READ_DATA
  * 	@return unsigned 8-bits value
  */
 uint8_t regalis_lcd_read(uint8_t register_select);
 
 /** Execute instruction
  * @param rl_instruction instruction to execute, should be one of:
- *  \b RL_CLEAR_DISPLAY
- *  \b RL_RETURN_HOME
- *  \b RL_DISPLAY_ON_OFF(ON_OFF, CURSOR, BLINK)
- *  \b RL_ENTRY_MODE_SET(INC, SHIFT)
- *  \b RL_FUNCTION_SET(MODE, LINES, FONT) 
+ *   RL_CLEAR_DISPLAY
+ *   RL_RETURN_HOME
+ *   RL_DISPLAY_ON_OFF(ON_OFF, CURSOR, BLINK)
+ *   RL_ENTRY_MODE_SET(INC, SHIFT)
+ *   RL_FUNCTION_SET(MODE, LINES, FONT) 
  */
 void regalis_lcd_instruction(uint8_t rl_instruction);
 
@@ -104,6 +112,7 @@ void regalis_lcd_putc(char character);
 void regalis_lcd_puts(const char* string);
 
 /** Move cursor to (x, y) position
+ * Note: (0, 0) is first character at first line
  * @param x horizontal position
  * @param y vertical position
  */

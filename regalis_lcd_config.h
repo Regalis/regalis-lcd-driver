@@ -17,6 +17,9 @@
 * 
 */
 
+#ifndef __REGALIS_LCD_CONFIG_
+#define __REGALIS_LCD_CONFIG_
+
 
 /**********************************************
  *               Connection block             *
@@ -36,8 +39,9 @@
 
 /** Number of lines in your display
  * Valid values:
- * \a 1
- * \a 2
+ *  1
+ *  2
+ *  4
 */
 #define REGALIS_LCD_LINES 2
 
@@ -46,23 +50,23 @@
 
 /** LCD font size
  * Valid values:
- * \a 0 for "5x8" font
- * \a 1 for "5x11" font
+ *  0 for "5x8" font
+ *  1 for "5x11" font
 */
 #define REGALIS_LCD_FONT 0
 
 /** LCD cursor
  * Valid values:
- * \a 1 - cursor is on
- * \a 0 - cursor is off
+ *  1 - cursor is on
+ *  0 - cursor is off
 */
 #define REGALIS_LCD_CURSOR 0
 
 /** LCD cursor blink
  * Valid values:
- * \a 1 - cursor blink is on, that performs alternate between
+ *  1 - cursor blink is on, that performs alternate between
  * all the high data and display character at the cursor position
- * \a 0 - blink is off
+ *  0 - blink is off
 */
 #define REGALIS_LCD_CURSOR_BLINK 0
 
@@ -75,14 +79,16 @@
 
 /** DDRAM/OGRAM default behavior after read/write operation
  * Valid values:
- * \a 0 - auto decrement mode
- * \a 1 - auto increment mode
+ *  0 - auto decrement mode
+ *  1 - auto increment mode
  */
 #define REGALIS_LCD_DDRAM_BH 1
 
 /** Shift of entire display
  * Valid values:
- * \a 0 - disable auto shift
- * \a 1 - enable auto shift
+ *  0 - disable auto shift
+ *  1 - enable auto shift
  */
 #define REGALIS_LCD_SHIFT 0
+
+#endif
