@@ -34,9 +34,9 @@
 	#define RL_LINE_ADDR_3 0x00
 #elif REGALIS_LCD_LINES == 4
 	#define RL_LINE_ADDR_0 0x00
-	#define RL_LINE_ADDR_1 0x14
-	#define RL_LINE_ADDR_2 0x28
-	#define RL_LINE_ADDR_3 0x3C
+	#define RL_LINE_ADDR_1 0x40
+	#define RL_LINE_ADDR_2 0x14
+	#define RL_LINE_ADDR_3 0x54
 #endif
 
 /* INSTRUCTIONS (can be executed manually with regalis_lcd_instruction()) */
