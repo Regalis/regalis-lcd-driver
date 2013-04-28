@@ -3,6 +3,8 @@
 An open-source, easy to use library for controlling LCD modules
 based on HD44780(U). Only **4-bits** interface is supported. 
 
+This library works with all Atmel AVR microcontrollers.
+
 # Examples
 
 *Before displaying the text on the LCD, you should review the
@@ -14,7 +16,7 @@ Before any read/write operations you ought to init LCD module
 by running `regalis_lcd_init()` function. This will perform
 module initialization by executing instructions (set interface
 mode to 4-bits, set cursor behaviour etc.). After this operations
-cursor will be placed in (0, 0) position - first character, first line.
+cursor will be placed at (0, 0) position - first character, first line.
 
 ```C
 (...)

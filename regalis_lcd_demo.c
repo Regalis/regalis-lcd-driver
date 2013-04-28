@@ -34,7 +34,7 @@ void regalis_lcd_demo() {
 	_delay_ms(2000);
 	regalis_soft_clear(8);
 	_delay_ms(1000);
-	regalis_soft_move(regalis_center(11), RL_LINE_2 + regalis_center(11), 11);
+	regalis_soft_move(regalis_center(11), RL_LINE_1 + regalis_center(11), 11);
 	_delay_ms(500);
 	regalis_lcd_home();
 	regalis_soft_puts("Patryk Jaworski");
