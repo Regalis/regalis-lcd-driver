@@ -282,8 +282,33 @@ uint8_t regalis_lcd_read(uint8_t register_select) {
 }
 
 void regalis_lcd_goto(uint8_t x, uint8_t y) {
-	// TODO: need optimalization!
-	regalis_lcd_instruction(RL_DDRAM_SET(RL_LINE_ADDR(y + 1) + x));
+	#if REGALIS_LCD_LINES == 1
+		regalis_lcd_instruction(RL_DDRAM_SET(x))
+	#elif REGALIS_LCD_LINES == 2
+		switch (y) {
+			case 0:
+				regalis_lcd_instruction(RL_DDRAM_SET(RL_LINE_0 + x));
+			break;
+			case 1:
+				regalis_lcd_instruction(RL_DDRAM_SET(RL_LINE_1 + x));
+			break;
+		}
+	#elif REGALIS_LCD_LINES == 4
+		switch (y) {
+			case 0:
+				regalis_lcd_instruction(RL_DDRAM_SET(RL_LINE_0 + x));
+			break;
+			case 1:
+				regalis_lcd_instruction(RL_DDRAM_SET(RL_LINE_1 + x));
+			break;
+			case 2:
+				regalis_lcd_instruction(RL_DDRAM_SET(RL_LINE_2 + x));
+			break;
+			case 3:
+				regalis_lcd_instruction(RL_DDRAM_SET(RL_LINE_3 + x));
+			break;
+		}
+	#endif
 }
 
 inline void regalis_lcd_goto_addr(uint8_t addr) {

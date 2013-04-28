@@ -22,7 +22,22 @@
 #include <inttypes.h>
 #include "regalis_lcd_config.h"
 
-#define RL_LINE_ADDR(X) ((0x50 / REGALIS_LCD_LINES) * (X - 1))
+#if REGALIS_LCD_LINES == 1
+	#define RL_LINE_ADDR_0 0x00
+	#define RL_LINE_ADDR_1 0x00
+	#define RL_LINE_ADDR_2 0x00
+	#define RL_LINE_ADDR_3 0x00
+#elif REGALIS_LCD_LINES == 2
+	#define RL_LINE_ADDR_0 0x00
+	#define RL_LINE_ADDR_1 0x40
+	#define RL_LINE_ADDR_2 0x00
+	#define RL_LINE_ADDR_3 0x00
+#elif REGALIS_LCD_LINES == 4
+	#define RL_LINE_ADDR_0 0x00
+	#define RL_LINE_ADDR_1 0x14
+	#define RL_LINE_ADDR_2 0x28
+	#define RL_LINE_ADDR_3 0x3C
+#endif
 
 /* INSTRUCTIONS (can be executed manually with regalis_lcd_instruction()) */
 #define RL_CLEAR_DISPLAY 0x01
@@ -47,10 +62,10 @@
 	#define RL_FONT_5x8 0x00
 	#define RL_FONT_5x11 0x04
 #define RL_DDRAM_SET(ADDR) 0x80 | ((ADDR) & 0x7F)
-	#define RL_LINE_1 RL_LINE_ADDR(1)
-	#define RL_LINE_2 RL_LINE_ADDR(2)
-	#define RL_LINE_3 RL_LINE_ADDR(3)
-	#define RL_LINE_4 RL_LINE_ADDR(4)
+	#define RL_LINE_0 RL_LINE_ADDR_0
+	#define RL_LINE_1 RL_LINE_ADDR_1
+	#define RL_LINE_2 RL_LINE_ADDR_2
+	#define RL_LINE_3 RL_LINE_ADDR_3
 #define RL_SHIFT_CURSOR(DIRECTION) 0x10 | (DIRECTION)
 	#define RL_CURSOR_RIGHT 0x4
 	#define RL_CURSOR_LEFT 0x0
