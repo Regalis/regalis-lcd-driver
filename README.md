@@ -7,8 +7,8 @@ This library works with all Atmel AVR microcontrollers.
 
 # Examples
 
-*Before displaying the text on the LCD, you should review the
-configuration file (**regalis_lcd_config.h**).*
+**Before displaying the text on the LCD, you should review the
+configuration file (regalis_lcd_config.h).**
 
 ## I. Hello world
 
