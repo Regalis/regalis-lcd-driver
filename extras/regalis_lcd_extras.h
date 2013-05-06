@@ -37,7 +37,7 @@ uint8_t regalis_center(uint8_t length);
 
 /** Print text with nice-looking smooth transition (from left to right)
  * Function will start from actual cursor position
- * @param src C string to print
+ * @param str C string to print
  */
 void regalis_soft_puts(const char *str);
 
@@ -52,7 +52,7 @@ void regalis_soft_clear(uint8_t length);
  * The memory areas must not overlap...
  * @param scr_addr DDRAM source address (address of first character to move)
  * @param dst_addr DDRAM destination address
- * @param legth number of characters to move
+ * @param length number of characters to move
  */
 void regalis_soft_move(uint8_t scr_addr, uint8_t dst_addr, uint8_t length);
 

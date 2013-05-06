@@ -7,8 +7,8 @@ This library works with all Atmel AVR microcontrollers.
 
 # Examples
 
-*Before displaying the text on the LCD, you should review the
-configuration file (**regalis_lcd_config.h**).*
+**Before displaying the text on the LCD, you should review the
+configuration file (regalis_lcd_config.h).**
 
 ## I. Hello world
 
@@ -88,6 +88,7 @@ Developed with **VIM** on **Arch GNU/Linux**, tested with:
 
 * **WC1602A0** (16x2)
 * **TC1602A-19T(R)** (16x2)
+* **YM2004A** (20x4)
 
 Feel free to report bugs and suggestions.
 
