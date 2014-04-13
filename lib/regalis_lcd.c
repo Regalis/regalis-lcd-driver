@@ -148,7 +148,10 @@ inline void regalis_lcd_instruction(uint8_t instruction) {
 
 void regalis_lcd_init() {
 	
+	/* E, RS, RW as output */
 	bit_high(RL_E_DDR, RL_E_PIN);
+	bit_high(RL_RS_DDR, RL_RS_PIN);
+	bit_high(RL_RW_DDR, RL_RW_PIN);
 
 	_delay_ms(100); // wait more than 40ms after Vcc rises to valid value
 	regalis_lcd_exec(0x03); // interface is 8 bits long
@@ -178,8 +181,6 @@ void regalis_lcd_init() {
 }
 
 static void regalis_lcd_exec(uint8_t command) {
-	bit_high(RL_RS_DDR, RL_RS_PIN);
-	bit_high(RL_RW_DDR, RL_RW_PIN);
 	bit_high(RL_D7_DDR, RL_D7_PIN);
 	bit_high(RL_D6_DDR, RL_D6_PIN);
 	bit_high(RL_D5_DDR, RL_D5_PIN);
@@ -233,10 +234,6 @@ inline static void regalis_lcd_enable() {
 }
 
 uint8_t regalis_lcd_read(uint8_t register_select) {
-
-	/* RS, RW as output */
-	bit_high(RL_RS_DDR, RL_RS_PIN);
-	bit_high(RL_RW_DDR, RL_RW_PIN);
 	/* data lines as input */
 	bit_low(RL_D7_DDR, RL_D7_PIN);
 	bit_low(RL_D6_DDR, RL_D6_PIN);
