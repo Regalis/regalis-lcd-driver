@@ -19,50 +19,77 @@
 
 #include <inttypes.h>
 
-#include <avr/io.h>
-#include <util/delay.h>
+#include "stm32f4xx.h"
 
 #include "regalis_lcd.h"
+#include "delay.h"
+
+#define _BV(X) (1 << (X))
 
 #define STR(X) #X
-#define GET_DDR(X, Y) DDR ## X
-#define GET_PORT(X, Y) PORT ## X
-#define GET_IN(X, Y) PIN ## X
+#define GET_MODER(X) X->MODER
+#define GET_OTYPER(X) X->OTYPER
+#define GET_OSPEEDR(X) X->OSPEEDR
+#define GET_PUPDR(X) X->PUPDR
+#define GET_ODR(X) X->ODR
+#define GET_IN(X) X->IDR
+#define GET_OUT_SET(X) X->BSRRL
+#define GET_OUT_CLEAR(X) X->BSRRH
 #define GET_PIN(X, Y) Y
-#define DDR(X) GET_DDR(X)
-#define PORT(X) GET_PORT(X)
-#define PIN(X) GET_PIN(X)
-#define IN(X) GET_IN(X)
+#define GET_GPIO(X, Y) GPIO ## X
 
-#define RL_RS_DDR DDR(REGALIS_LCD_RS)
-#define RL_RS_PORT PORT(REGALIS_LCD_RS)
+#define MODER(X) GET_MODER(GET_GPIO(X))
+#define OTYPER(X) GET_OTYPER(GET_GPIO(X))
+#define OSPEEDR(X) GET_SPEEDR(GET_GPIO(X))
+#define PUPDR(X) GET_PUPDR(GET_GPIO(X))
+#define ODR(X) GET_ODR(GET_GPIO(X))
+#define OUT_SET(X) GET_OUT_SET(GET_GPIO(X))
+#define OUT_CLEAR(X) GET_OUT_CLEAR(GET_GPIO(X))
+#define PIN(X) GET_PIN(X)
+#define IN(X) GET_IN(GET_GPIO(X))
+#define GPIO(X) GET_GPIO(X)
+
+#define set_as_output(X, Y) \
+	GET_MODER(X) |= (_BV(Y * 2))
+
+#define set_as_input(X, Y) \
+	GET_MODER(X) &= ~(_BV(Y * 2) | _BV(Y * 2 + 1))
+
+#define output_init(X, Y) \
+	GET_OTYPER(X) &= ~(_BV(Y)); \
+	GET_OSPEEDR(X) &= ~(_BV(Y) | _BV(Y + 1))
+
+#define input_init(X, Y) \
+	GET_PUPDR(X) |= (_BV(Y * 2))
+
+
+#define RL_RS_OUT_CLEAR OUT_CLEAR(REGALIS_LCD_RS)
+#define RL_RS_OUT_SET OUT_SET(REGALIS_LCD_RS)
+#define RL_RS_OUT ODR(REGALIS_LCD_RS)
 #define RL_RS_PIN PIN(REGALIS_LCD_RS)
 
-#define RL_RW_DDR DDR(REGALIS_LCD_RW)
-#define RL_RW_PORT PORT(REGALIS_LCD_RW)
+#define RL_RW_OUT_CLEAR OUT_CLEAR(REGALIS_LCD_RW)
+#define RL_RW_OUT_SET OUT_SET(REGALIS_LCD_RW)
+#define RL_RW_OUT ODR(REGALIS_LCD_RW)
 #define RL_RW_PIN PIN(REGALIS_LCD_RW)
 
-#define RL_E_DDR DDR(REGALIS_LCD_E)
-#define RL_E_PORT PORT(REGALIS_LCD_E)
+#define RL_E_OUT_CLEAR OUT_CLEAR(REGALIS_LCD_E)
+#define RL_E_OUT_SET OUT_SET(REGALIS_LCD_E)
 #define RL_E_PIN PIN(REGALIS_LCD_E)
 
-#define RL_D4_DDR DDR(REGALIS_LCD_D4)
-#define RL_D4_PORT PORT(REGALIS_LCD_D4)
+#define RL_D4_OUT ODR(REGALIS_LCD_D4)
 #define RL_D4_PIN PIN(REGALIS_LCD_D4)
 #define RL_D4_IN IN(REGALIS_LCD_D4)
 
-#define RL_D5_DDR DDR(REGALIS_LCD_D5)
-#define RL_D5_PORT PORT(REGALIS_LCD_D5)
+#define RL_D5_OUT ODR(REGALIS_LCD_D5)
 #define RL_D5_PIN PIN(REGALIS_LCD_D5)
 #define RL_D5_IN IN(REGALIS_LCD_D5)
 
-#define RL_D6_DDR DDR(REGALIS_LCD_D6)
-#define RL_D6_PORT PORT(REGALIS_LCD_D6)
+#define RL_D6_OUT ODR(REGALIS_LCD_D6)
 #define RL_D6_PIN PIN(REGALIS_LCD_D6)
 #define RL_D6_IN IN(REGALIS_LCD_D6)
 
-#define RL_D7_DDR DDR(REGALIS_LCD_D7)
-#define RL_D7_PORT PORT(REGALIS_LCD_D7)
+#define RL_D7_OUT ODR(REGALIS_LCD_D7)
 #define RL_D7_PIN PIN(REGALIS_LCD_D7)
 #define RL_D7_IN IN(REGALIS_LCD_D7)
 
@@ -121,6 +148,7 @@
 #define bit_low(REG, BIT_NO) REG &= ~(_BV(BIT_NO))
 #define bit_high(REG, BIT_NO) REG |= (_BV(BIT_NO))
 #define get_bit(REG, BIT_NO) ((REG & _BV(BIT_NO)) >> (BIT_NO))
+#define get_bit_32(REG, BIT_NO) (((uint32_t)REG & (uint32_t)_BV(BIT_NO)) >> (BIT_NO))
 #define set_bit(REG, BIT_NO, VAL) REG = (((VAL) == HIGH) ? REG | (_BV(BIT_NO)) : REG & ~(_BV(BIT_NO)))
 
 /* Internal functions */
@@ -148,10 +176,20 @@ inline void regalis_lcd_instruction(uint8_t instruction) {
 
 void regalis_lcd_init() {
 	
-	/* E, RS, RW as output */
-	bit_high(RL_E_DDR, RL_E_PIN);
-	bit_high(RL_RS_DDR, RL_RS_PIN);
-	bit_high(RL_RW_DDR, RL_RW_PIN);
+	set_as_output(GPIO(REGALIS_LCD_E), PIN(REGALIS_LCD_E));
+	set_as_output(GPIO(REGALIS_LCD_RS), PIN(REGALIS_LCD_RS));
+	set_as_output(GPIO(REGALIS_LCD_RW), PIN(REGALIS_LCD_RW));
+	output_init(GPIO(REGALIS_LCD_E), PIN(REGALIS_LCD_E));
+	output_init(GPIO(REGALIS_LCD_RS), PIN(REGALIS_LCD_RS));
+	output_init(GPIO(REGALIS_LCD_RW), PIN(REGALIS_LCD_RW));
+	output_init(GPIO(REGALIS_LCD_D4), PIN(REGALIS_LCD_D4));
+	output_init(GPIO(REGALIS_LCD_D5), PIN(REGALIS_LCD_D5));
+	output_init(GPIO(REGALIS_LCD_D6), PIN(REGALIS_LCD_D6));
+	output_init(GPIO(REGALIS_LCD_D7), PIN(REGALIS_LCD_D7));
+	input_init(GPIO(REGALIS_LCD_D4), PIN(REGALIS_LCD_D4));
+	input_init(GPIO(REGALIS_LCD_D5), PIN(REGALIS_LCD_D5));
+	input_init(GPIO(REGALIS_LCD_D6), PIN(REGALIS_LCD_D6));
+	input_init(GPIO(REGALIS_LCD_D7), PIN(REGALIS_LCD_D7));
 
 	_delay_ms(100); // wait more than 40ms after Vcc rises to valid value
 	regalis_lcd_exec(0x03); // interface is 8 bits long
@@ -181,17 +219,17 @@ void regalis_lcd_init() {
 }
 
 static void regalis_lcd_exec(uint8_t command) {
-	bit_high(RL_D7_DDR, RL_D7_PIN);
-	bit_high(RL_D6_DDR, RL_D6_PIN);
-	bit_high(RL_D5_DDR, RL_D5_PIN);
-	bit_high(RL_D4_DDR, RL_D4_PIN);
+	set_as_output(GPIO(REGALIS_LCD_D7), PIN(REGALIS_LCD_D7));
+	set_as_output(GPIO(REGALIS_LCD_D6), PIN(REGALIS_LCD_D6));
+	set_as_output(GPIO(REGALIS_LCD_D5), PIN(REGALIS_LCD_D5));
+	set_as_output(GPIO(REGALIS_LCD_D4), PIN(REGALIS_LCD_D4));
 	
-	set_bit(RL_RS_PORT, RL_RS_PIN, get_bit(command, 5));	
-	set_bit(RL_RW_PORT, RL_RW_PIN, get_bit(command, 4));
-	set_bit(RL_D7_PORT, RL_D7_PIN, get_bit(command, 3));
-	set_bit(RL_D6_PORT, RL_D6_PIN, get_bit(command, 2));
-	set_bit(RL_D5_PORT, RL_D5_PIN, get_bit(command, 1));
-	set_bit(RL_D4_PORT, RL_D4_PIN, get_bit(command, 0));
+	set_bit(RL_RS_OUT, RL_RS_PIN, get_bit(command, 5));	
+	set_bit(RL_RW_OUT, RL_RW_PIN, get_bit(command, 4));
+	set_bit(RL_D7_OUT, RL_D7_PIN, get_bit(command, 3));
+	set_bit(RL_D6_OUT, RL_D6_PIN, get_bit(command, 2));
+	set_bit(RL_D5_OUT, RL_D5_PIN, get_bit(command, 1));
+	set_bit(RL_D4_OUT, RL_D4_PIN, get_bit(command, 0));
 	
 	regalis_lcd_enable();
 }
@@ -228,51 +266,46 @@ void regalis_lcd_puts(const char *str) {
 }
 
 inline static void regalis_lcd_enable() {
-	bit_high(RL_E_PORT, RL_E_PIN);
+	bit_high(RL_E_OUT_SET, RL_E_PIN);
 	_delay_us(5);
-	bit_low(RL_E_PORT, RL_E_PIN);
+	bit_high(RL_E_OUT_CLEAR, RL_E_PIN);
 }
 
 uint8_t regalis_lcd_read(uint8_t register_select) {
+
 	/* data lines as input */
-	bit_low(RL_D7_DDR, RL_D7_PIN);
-	bit_low(RL_D6_DDR, RL_D6_PIN);
-	bit_low(RL_D5_DDR, RL_D5_PIN);
-	bit_low(RL_D4_DDR, RL_D4_PIN);
-	/* turn on internal pull-up resistors */
-	bit_high(RL_D7_PORT, RL_D7_PIN);
-	bit_high(RL_D6_PORT, RL_D6_PIN);
-	bit_high(RL_D5_PORT, RL_D5_PIN);
-	bit_high(RL_D4_PORT, RL_D4_PIN);
-	_delay_us(3); /* wait for resistors */
-	
+	set_as_input(GPIO(REGALIS_LCD_D7), PIN(REGALIS_LCD_D7));
+	set_as_input(GPIO(REGALIS_LCD_D6), PIN(REGALIS_LCD_D6));
+	set_as_input(GPIO(REGALIS_LCD_D5), PIN(REGALIS_LCD_D5));
+	set_as_input(GPIO(REGALIS_LCD_D4), PIN(REGALIS_LCD_D4));
+
 	/* prepare for read busy flag and address couter */
 	if(register_select == RL_READ_BUSY)
-		bit_low(RL_RS_PORT, RL_RS_PIN);
+		bit_high(RL_RS_OUT_CLEAR, RL_RS_PIN);
 	else
-		bit_high(RL_RS_PORT, RL_RS_PIN);
+		bit_high(RL_RS_OUT_SET, RL_RS_PIN);
 
-	bit_high(RL_RW_PORT, RL_RW_PIN);
+	bit_high(RL_RW_OUT_SET, RL_RW_PIN);
 
 	uint8_t data = 0x00;
 
-	bit_high(RL_E_PORT, RL_E_PIN);
-	_delay_us(30);
-	set_bit(data, 7, get_bit(RL_D7_IN, RL_D7_PIN));
-	set_bit(data, 6, get_bit(RL_D6_IN, RL_D6_PIN));
-	set_bit(data, 5, get_bit(RL_D5_IN, RL_D5_PIN));
-	set_bit(data, 4, get_bit(RL_D4_IN, RL_D4_PIN));
-	bit_low(RL_E_PORT, RL_E_PIN);
+	bit_high(RL_E_OUT_SET, RL_E_PIN);
+	_delay_us(40);
+	set_bit(data, 7, get_bit_32(RL_D7_IN, RL_D7_PIN));
+	set_bit(data, 6, get_bit_32(RL_D6_IN, RL_D6_PIN));
+	set_bit(data, 5, get_bit_32(RL_D5_IN, RL_D5_PIN));
+	set_bit(data, 4, get_bit_32(RL_D4_IN, RL_D4_PIN));
+	bit_high(RL_E_OUT_CLEAR, RL_E_PIN);
 
-	_delay_us(10);
+	_delay_us(20);
 
-	bit_high(RL_E_PORT, RL_E_PIN);
-	_delay_us(30);
-	set_bit(data, 3, get_bit(RL_D7_IN, RL_D7_PIN));
-	set_bit(data, 2, get_bit(RL_D6_IN, RL_D6_PIN));
-	set_bit(data, 1, get_bit(RL_D5_IN, RL_D5_PIN));
-	set_bit(data, 0, get_bit(RL_D4_IN, RL_D4_PIN));
-	bit_low(RL_E_PORT, RL_E_PIN);
+	bit_high(RL_E_OUT_SET, RL_E_PIN);
+	_delay_us(40);
+	set_bit(data, 3, get_bit_32(RL_D7_IN, RL_D7_PIN));
+	set_bit(data, 2, get_bit_32(RL_D6_IN, RL_D6_PIN));
+	set_bit(data, 1, get_bit_32(RL_D5_IN, RL_D5_PIN));
+	set_bit(data, 0, get_bit_32(RL_D4_IN, RL_D4_PIN));
+	bit_high(RL_E_OUT_CLEAR, RL_E_PIN);
 
 	return data;
 
